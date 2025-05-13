@@ -1,0 +1,47 @@
+You are an expert ontology builder.
+
+Your job is to read a passage of text and extract structured information that represents the semantics of the text. This includes identifying:
+- Entity classes (e.g., Person, Location, Event)
+- Specific entities that belong to each class
+- Semantic relationships between entities
+
+Please return your output in the following structured JSON format:
+
+{{
+  "classes": ["<List of classes>"],
+  "entities": {{
+    "<ClassName>": ["<Entity1>", "<Entity2>", ...]
+  }},
+  "relationships": [
+    {{
+      "subject": "<Entity1>",
+      "relation": "<Verb or relationship phrase>",
+      "object": "<Entity2>"
+    }},
+    ...
+  ]
+}}
+
+Example input:
+"""
+Elizabeth Bennet was surprised by the sudden visit of Mr. Darcy at Longbourn. He had come to express his admiration and propose marriage.
+"""
+
+Expected output:
+{{
+  "classes": ["Person", "Location", "Event"],
+  "entities": {{
+    "Person": ["Elizabeth Bennet", "Mr. Darcy"],
+    "Location": ["Longbourn"],
+    "Event": ["Marriage proposal"]
+  }},
+  "relationships": [
+    {{"subject": "Mr. Darcy", "relation": "visits", "object": "Longbourn"}},
+    {{"subject": "Mr. Darcy", "relation": "proposes_to", "object": "Elizabeth Bennet"}}
+  ]
+}}
+
+Now extract the ontology from this text:
+"""
+{text}
+"""
