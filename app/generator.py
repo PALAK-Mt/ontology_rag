@@ -1,41 +1,27 @@
-from transformers import (
-    AutoTokenizer,
-    AutoModelForSeq2SeqLM,
-    AutoModelForCausalLM,
-    pipeline,
-)
-from typing import List
+# app/generator.py
+from typing import List, Optional
+from app.llm_chat import chat_with_model
 
-def load_llm_pipeline(dev_mode=True):
-    if dev_mode:
-        model_id = "google/flan-t5-base"
-        task = "text2text-generation"
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_id)
-    else:
-        model_id = "openchat/openchat-3.5-1210"
-        task = "text-generation"
-        model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True)
+def generate_answer(query: str, context_chunks: List[str], ontology_triples: Optional[List[List[str]]] = None) -> str:
+    context = "\n\n".join(context_chunks)[:3000]
 
-    tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
-    return pipeline(task, model=model, tokenizer=tokenizer)
+    triple_section = ""
+    if ontology_triples:
+        
+        triple_lines = [
+    f"{a} — {b} — {c}" 
+    for t in ontology_triples 
+    if isinstance(t, (list, tuple)) and len(t) == 3
+    for a, b, c in [t]
+]
 
-def format_prompt(query: str, context_chunks: List[str]) -> str:
-    # Truncate context to avoid exceeding model input limit
-    context = "\n\n".join(context_chunks)
-    context = context[:2000]  # ~500 tokens worth of context
+        triple_section = "Ontology Knowledge Triples:\n" + "\n".join(triple_lines) + "\n\n"
 
-    prompt = (
-        "You are a helpful assistant. Use the context below to answer the question.\n\n"
-        f"Context:\n{context}\n\n"
-        f"Question: {query}\n\n"
-        "Answer:"
-    )
-    return prompt
+    system = "You are a helpful assistant that answers questions using the provided context and ontology facts."
+    user = f"{triple_section}Context:\n{context}\n\nQuestion: {query}\n\nAnswer:"
 
-def generate_answer(query: str, context_chunks: List[str], pipe=None) -> str:
-    if pipe is None:
-        pipe = load_llm_pipeline()
-
-    prompt = format_prompt(query, context_chunks)
-    response = pipe(prompt, max_new_tokens=600, do_sample=False)
-    return response[0]["generated_text"].split("Answer:")[-1].strip()
+    response_text = chat_with_model([
+        {"role": "system", "content": system},
+        {"role": "user", "content": user}
+    ])
+    return response_text.strip()

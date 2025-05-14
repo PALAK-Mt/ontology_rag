@@ -25,6 +25,7 @@ def clean_text(text: str) -> str:
     # Normalize whitespace
     text = re.sub(r'\r\n|\r', '\n', text)
     text = re.sub(r'\n{3,}', '\n\n', text)  # Reduce excessive newlines
+    text = re.sub(r'^Illustration:.*$', '', text, flags=re.MULTILINE)
     text = text.strip()
 
     return text
@@ -47,7 +48,7 @@ def chunk_text(text: str, max_tokens: int = 350) -> List[str]:
     return chunks
 
 
-def preprocess_book(file_path: Path, max_tokens: int = 350) -> List[str]:
+def preprocess_book(file_path: Path, max_tokens: int = 250) -> List[str]:
     """
     Load, clean, and chunk a book into manageable text segments.
     """

@@ -1,47 +1,67 @@
-You are an expert ontology builder.
+You are an intelligent language model that extracts ontologies from plain English text.
 
-Your job is to read a passage of text and extract structured information that represents the semantics of the text. This includes identifying:
-- Entity classes (e.g., Person, Location, Event)
-- Specific entities that belong to each class
-- Semantic relationships between entities
+You will be given a short passage. Your task is to:
+1. Identify high-level classes (e.g., Person, Location, Organization, Book).
+2. Extract specific named entities for each class.
+3. Identify relationships between entities as (subject, predicate, object) triples.
+4. Output a single valid JSON object with the following structure:
 
-Please return your output in the following structured JSON format:
+- "classes": a list of high-level concepts
+- "entities": a dictionary mapping class names to lists of entities
+- "relationships": a list of subject-predicate-object triples
 
+⚠️ Strict rules:
+- Only return valid JSON. No prose, no markdown, no extra text.
+- Use proper brackets, colons, and double quotes.
+- The response must start with `{{` and end with `}}`.
+- Do NOT include explanations or formatting.
+
+---
+
+Example 1:
+
+TEXT:
+Mr. Darcy lives in Pemberley. Elizabeth Bennet dislikes him at first. Charlotte Lucas is Elizabeth's friend.
+
+JSON Output:
 {{
-  "classes": ["<List of classes>"],
+  "classes": ["Person", "Location"],
   "entities": {{
-    "<ClassName>": ["<Entity1>", "<Entity2>", ...]
+    "Person": ["Mr. Darcy", "Elizabeth Bennet", "Charlotte Lucas"],
+    "Location": ["Pemberley"]
   }},
   "relationships": [
-    {{
-      "subject": "<Entity1>",
-      "relation": "<Verb or relationship phrase>",
-      "object": "<Entity2>"
-    }},
-    ...
+    ["Mr. Darcy", "lives in", "Pemberley"],
+    ["Elizabeth Bennet", "dislikes", "Mr. Darcy"],
+    ["Charlotte Lucas", "is friend of", "Elizabeth Bennet"]
   ]
 }}
 
-Example input:
-"""
-Elizabeth Bennet was surprised by the sudden visit of Mr. Darcy at Longbourn. He had come to express his admiration and propose marriage.
-"""
+---
 
-Expected output:
+Example 2:
+
+TEXT:
+Jane Austen wrote Pride and Prejudice. The story is set in Hertfordshire and Derbyshire.
+
+JSON Output:
 {{
-  "classes": ["Person", "Location", "Event"],
+  "classes": ["Person", "Book", "Location"],
   "entities": {{
-    "Person": ["Elizabeth Bennet", "Mr. Darcy"],
-    "Location": ["Longbourn"],
-    "Event": ["Marriage proposal"]
+    "Person": ["Jane Austen"],
+    "Book": ["Pride and Prejudice"],
+    "Location": ["Hertfordshire", "Derbyshire"]
   }},
   "relationships": [
-    {{"subject": "Mr. Darcy", "relation": "visits", "object": "Longbourn"}},
-    {{"subject": "Mr. Darcy", "relation": "proposes_to", "object": "Elizabeth Bennet"}}
+    ["Jane Austen", "wrote", "Pride and Prejudice"],
+    ["Pride and Prejudice", "is set in", "Hertfordshire"],
+    ["Pride and Prejudice", "is set in", "Derbyshire"]
   ]
 }}
 
-Now extract the ontology from this text:
-"""
+---
+
+TEXT:
 {text}
-"""
+
+JSON Output:
